@@ -1,0 +1,41 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract RequireAssertRevert  {
+    address private owner;
+    uint public balance;
+
+    constructor()  {
+        owner = msg.sender;
+        balance = 0;
+    }
+
+    function deposit(uint amount) public  {
+        require(msg.sender == owner, "Only the owner can deposit funds");
+        require(amount > 0, "Deposit amount must be greater than 0");
+        balance += amount;
+    }
+
+    function withdraw(uint amount) public  {
+        require(msg.sender == owner, "Only the owner can withdraw funds");
+        require(amount > 0, "Withdrawal amount must be greater than 0");
+        require(balance >= amount, "Insufficient balance");
+
+        balance -= amount;
+        require(balance >= 0, "Balance cannot be negative");
+    }
+
+    function transfer(address recipient, uint amount) public  {
+        require(msg.sender == owner, "Only the owner can transfer funds");
+        require(amount > 0, "Transfer amount must be greater than 0");
+        require(balance >= amount, "Insufficient balance");
+
+        balance -= amount;
+        (bool success,) = recipient.call{value: amount}(new bytes(0));
+            if  (!success) {
+             revert("Transfer failed");
+            }
+
+    }
+}
+//@custom:dev-run-script NatSpec
